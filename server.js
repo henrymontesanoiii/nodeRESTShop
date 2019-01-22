@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 
 // Connect to the Mongo DB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/nodeRestShop');
+mongoose.Promise = global.Promise;
 
 //overwrite CORS
 app.use((req, res, next) => {

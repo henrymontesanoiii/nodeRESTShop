@@ -6,10 +6,27 @@ const mongoose = require('mongoose');
 
 router.get('/', (req, res) => {
   Product.find()
+  .select('name price _id')
     .then(docs => {
-      console.log('From database', docs);
+      const response = {
+        count: docs.length,
+        products: docs.map(doc => {
+          return {
+            name: doc.name,
+            price: doc.price,
+            _id: doc._id,
+            url: {
+              request: {
+                type: 'GET',
+                description: "Get Specific Product Information",
+                url: '/products/'+doc._id
+              }
+            }
+          }
+        })
+      }
       if (docs.length > 0) {
-        res.status(200).json(docs);
+        res.status(200).json(response);
       } else {
         res.status(200).json({
           message: 'No entries found'
@@ -36,10 +53,23 @@ router.post('/', (req, res) => {
     .save()
     .then(result => {
       console.log(result);
+      const createdProduct = {
+        id: result._id,
+      name: result.name,
+      price: result.price,
+      url: {
+        request: {
+          type: 'GET',
+          url: '/products/'+result._id
+        }
+      }
+
+      
+    }
       res.status(201).json({
-        message: 'Handling POST requests to /products',
-        createdProduct: result
-      });
+        message: 'Created Product',
+        product: createdProduct
+        });
     })
     .catch(err => {
       console.log(err);
@@ -54,10 +84,23 @@ router.post('/', (req, res) => {
 router.get('/:productId', (req, res) => {
   const id = req.params.productId;
   Product.findById(id)
+  .select('name price _id')
     .then(doc => {
-      console.log('From database', doc);
       if (doc) {
-        res.status(200).json(doc);
+        res.status(200).json({
+          name: doc.name,
+          price: doc.price,
+          _id: doc._id,
+          url: {
+            request: {
+              type: 'GET',
+              description: 'Get All Products',
+              url: '/products/'
+            }
+          }
+        });
+        
+        
       } else {
         res.status(404).json({ message: 'No valid entry found for provided ID' })
       }
@@ -85,8 +128,15 @@ router.patch('/:productId', (req, res) => {
     }
   )
     .then(result => {
-      console.log(result);
-      res.status(200).json(result)
+      
+      res.status(200).json({
+        message: 'Product Updated',
+        request: {
+          type: 'GET',
+          description: 'Get Updated Product Information',
+          url: '/products/'+id
+        }
+      })
     })
     .catch(
       err => {
@@ -103,7 +153,15 @@ router.delete('/:productId', (req, res) => {
     _id: id
   })
     .then(result => {
-      res.status(200).json(result)
+      res.status(200).json({
+        message: 'Product Deleted',
+        request: {
+          type: 'POST',
+          description: 'Create new Product',
+          url: '/products/',
+          body: {name: 'String', price: 'Number'}
+        }
+      })
     })
     .catch(
       err => {

@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require("mongoose");
 
 
 
@@ -13,6 +14,9 @@ app.use(express.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Connect to the Mongo DB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/nodeRestShop');
 
 //overwrite CORS
 app.use((req, res, next) => {
@@ -48,6 +52,8 @@ app.use((error, req, res, next) => {
     }
   })
 });
+
+
 
 // Start the API server
 app.listen(PORT, function() {
